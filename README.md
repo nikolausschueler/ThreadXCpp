@@ -2,20 +2,20 @@
 ## Setup threadX for GCC
 
 * For STM32CubeIDE add the following section into the .ld file:
-       ._threadx_heap :
-         {
-            . = ALIGN(8);
-            __RAM_segment_used_end__ = .;
-            . = . + 64K;
-            . = ALIGN(8);
-          } >RAM_D1 AT> RAM_D1
-      * The simplest way to provide memory for ThreadX is to define a new section, see ._threadx_heap above.
-      * In the example above the ThreadX heap size is set to 64KBytes.
-      * The ._threadx_heap must be located between the .bss and the ._user_heap_stack sections in the linker script.
-      * Caution: Make sure that ThreadX does not need more than the provided heap memory (64KBytes in this example).
-      * Read more in STM32CubeIDE User Guide, chapter: "Linker script".
 
+        ._threadx_heap :
+        {
+         . = ALIGN(8);
+         __RAM_segment_used_end__ = .;
+         . = . + 64K;
+         . = ALIGN(8);
+        } >RAM_D1 AT> RAM_D1
 
+* The simplest way to provide memory for ThreadX is to define a new section, see ._threadx_heap above.
+* In the example above the ThreadX heap size is set to 64KBytes.
+* The ._threadx_heap must be located between the .bss and the ._user_heap_stack sections in the linker script.
+* Caution: Make sure that ThreadX does not need more than the provided heap memory (64KBytes in this example).
+* Read more in STM32CubeIDE User Guide, chapter: "Linker script".
 * uncomment USER_VECT_TAB_ADDRESS
 
 ThreadX uses following interrupts: SysTick, PendSV and SVCall with the last two being invoked exclusively from process context, to my understanding. The only one occurring asynchronously to the thread execution is periodic SysTick interrupt, which will fire every 10ms by default. This interrupt drives the timeouts, time-slicing and some pre-emption cases. Because a fair bit of RTOS housekeeping is handled inside its context, we recommend that any user-configured interrupts are set to the higher priority so that they're executed first (hence the lowest interrupt for CM4 and CM0+ is said to be "not valid if using ThreadX").
